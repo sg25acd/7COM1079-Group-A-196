@@ -1,38 +1,35 @@
-colnames(X2006_2012_math_test_results_school_gender_1)[6] <- "Averagescore"
-colnames(X2006_2012_math_test_results_school_gender_1)[7] <- "Prof Level1"
-colnames(X2006_2012_math_test_results_school_gender_1)[9] <- "Prof Level2"
-colnames(X2006_2012_math_test_results_school_gender_1)[11] <- "Prof Level3"
+#✔ Load libraries and dataset
+library(readxl)
 library(dplyr)
 library(ggplot2)
 
-# Clean the Averagescore variable
-X2006_2012_math_test_results_school_gender_1 <- X2006_2012_math_test_results_school_gender_1 %>%
+# Load your Excel file
+data <- read_excel("2006-2012-math-test-results-school-gender-1 (1).xlsx")
+
+#✔ Rename Columns (Your Required Column Renaming)
+colnames(data)[6]  <- "Averagescore"
+colnames(data)[7]  <- "Prof_Level1"
+colnames(data)[9]  <- "Prof_Level2"
+colnames(data)[11] <- "Prof_Level3"
+
+#✔ Clean Averagescore (convert to numeric but keep all data)
+data <- data %>%
   mutate(
     Averagescore = ifelse(Averagescore == "s", NA, Averagescore),
     Averagescore = as.numeric(Averagescore)
   )
 
-# Convert Year to factor
-# Clean Averagescore BUT KEEP ALL OTHER COLUMNS
-X2006_2012_math_test_results_school_gender_1 <- X2006_2012_math_test_results_school_gender_1 %>%
-  mutate(
-    Averagescore = ifelse(Averagescore == "s", NA, Averagescore),
-    Averagescore = as.numeric(Averagescore)
-  )
+#✔ Convert Year to factor
+data$Year <- as.factor(data$Year)
 
-# Convert Year to factor
-X2006_2012_math_test_results_school_gender_1$Year <- 
-  as.factor(X2006_2012_math_test_results_school_gender_1$Year)
-
-# Filter only Male & Female rows
+#✔ Filter Male/Female ONLY (no column deletion)
 data_gender <- data %>%
-  filter(Demographic %in% c("Male", "Female")) %>%
-  select(Year, Demographic, Mean_Scale_Score)
+  filter(Demographic %in% c("Male", "Female"))
 
-# Summary statistics by Year and Demographic
+#✔ Summary statistics (Mean of Averagescore)
 summary_gender <- data_gender %>%
   group_by(Year, Demographic) %>%
-  summarise(mean_score = mean(Mean_Scale_Score, na.rm = TRUE),
+  summarise(mean_score = mean(Averagescore, na.rm = TRUE),
             .groups = 'drop')
 
 print(summary_gender)
