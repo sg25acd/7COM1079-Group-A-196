@@ -1,20 +1,28 @@
-# Load necessary libraries
+colnames(X2006_2012_math_test_results_school_gender_1)[6] <- "Averagescore"
+colnames(X2006_2012_math_test_results_school_gender_1)[7] <- "Prof Level1"
+colnames(X2006_2012_math_test_results_school_gender_1)[9] <- "Prof Level2"
+colnames(X2006_2012_math_test_results_school_gender_1)[11] <- "Prof Level3"
 library(dplyr)
 library(ggplot2)
-library(readr)
 
-# Load the CSV file
-data <- read_csv("2006-2012-math-test-results-school-gender-1 (1).csv")
-
-# Rename the 'Mean Scale Score' column
-data <- data %>%
-  rename(Mean_Scale_Score = `Mean Scale Score`)
-
-# Convert Mean_Scale_Score to numeric
-data$Mean_Scale_Score <- as.numeric(data$Mean_Scale_Score)
+# Clean the Averagescore variable
+X2006_2012_math_test_results_school_gender_1 <- X2006_2012_math_test_results_school_gender_1 %>%
+  mutate(
+    Averagescore = ifelse(Averagescore == "s", NA, Averagescore),
+    Averagescore = as.numeric(Averagescore)
+  )
 
 # Convert Year to factor
-data$Year <- as.factor(data$Year)
+# Clean Averagescore BUT KEEP ALL OTHER COLUMNS
+X2006_2012_math_test_results_school_gender_1 <- X2006_2012_math_test_results_school_gender_1 %>%
+  mutate(
+    Averagescore = ifelse(Averagescore == "s", NA, Averagescore),
+    Averagescore = as.numeric(Averagescore)
+  )
+
+# Convert Year to factor
+X2006_2012_math_test_results_school_gender_1$Year <- 
+  as.factor(X2006_2012_math_test_results_school_gender_1$Year)
 
 # Filter only Male & Female rows
 data_gender <- data %>%
