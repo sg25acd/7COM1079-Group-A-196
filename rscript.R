@@ -28,3 +28,21 @@ summary_gender <- data_gender %>%
             .groups = 'drop')
 
 print(summary_gender)
+
+# Histogram for Male students
+ggplot(data_gender %>% filter(Demographic == "Male"),
+       aes(x = Mean_Scale_Score)) +
+  geom_histogram(binwidth = 10, fill = "blue", color = "black") +
+  facet_wrap(~Year) +
+  labs(title = "Histogram of Mean Scale Score for Male Students",
+       x = "Mean Scale Score", y = "Count") +
+  theme_minimal()
+
+# Histogram for Female students
+ggplot(data_gender %>% filter(Demographic == "Female"),
+       aes(x = Mean_Scale_Score)) +
+  geom_histogram(binwidth = 10, fill = "pink", color = "black") +
+  facet_wrap(~Year) +
+  labs(title = "Histogram of Mean Scale Score for Female Students",
+       x = "Mean Scale Score", y = "Count") +
+  theme_minimal()
