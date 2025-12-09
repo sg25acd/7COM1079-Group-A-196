@@ -46,3 +46,12 @@ ggplot(data_gender %>% filter(Demographic == "Female"),
   labs(title = "Histogram of Mean Scale Score for Female Students",
        x = "Mean Scale Score", y = "Count") +
   theme_minimal()
+
+# Bar plot
+ggplot(summary_gender, aes(x = Year, y = mean_score, fill = Demographic)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  scale_fill_manual(values = c("Male" = "blue", "Female" = "pink")) +
+  labs(title = "Year-wise Comparison of Mean Scale Score by Gender",
+       x = "Year", y = "Mean Scale Score") +
+  theme_minimal()
+
