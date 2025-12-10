@@ -1,1 +1,8 @@
 Here will be the visualisation 
+
+Visualizations Created:
+
+1. Histogram with Normal Curve
+   - Shows score distribution for Male and Female students
+   - Includes red normal distribution curve
+   - Separated by gender for comparison
