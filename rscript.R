@@ -34,6 +34,11 @@ summary_gender <- data_gender %>%
 
 print(summary_gender)
 
+# Clean data for analysis
+data_clean <- data_gender %>%
+  filter(!is.na(Averagescore)) %>%
+  select(Year, Demographic, Averagescore)
+
 # Histogram for Male students
 ggplot(data_gender %>% filter(Demographic == "Male"),
        aes(x = Mean_Scale_Score)) +
