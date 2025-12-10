@@ -66,11 +66,11 @@ histogram_function <- function(df, binwidth = 10, ymax = 1000) {
 
 print(histogram_function(data_clean, binwidth = 10, ymax = 7000))
 
-# Bar plot
-ggplot(summary_gender, aes(x = Year, y = mean_score, fill = Demographic)) +
-  geom_bar(stat = "identity", position = "dodge") +
-  scale_fill_manual(values = c("Male" = "blue", "Female" = "pink")) +
-  labs(title = "Year-wise Comparison of Mean Scale Score by Gender",
-       x = "Year", y = "Mean Scale Score") +
-  theme_minimal()
+# Visualization 2: Boxplot
+boxplot_plot <- ggplot(data_clean, aes(x = Demographic, y = Averagescore, fill = Demographic)) +
+  geom_boxplot() + scale_fill_manual(values = c("Male" = "blue", "Female" = "pink")) +
+  labs(title = "Boxplot: Distribution of Mathematics Scores by Gender (2006-2012)",
+       x = "Demographic", y = "Average Score") + theme_minimal()
+
+print(boxplot_plot)
 
