@@ -6,3 +6,8 @@ Visualizations Created:
    - Shows score distribution for Male and Female students
    - Includes red normal distribution curve
    - Separated by gender for comparison
+
+2. Boxplot Comparison
+   - Compares mathematics scores between genders
+   - Blue for Male, Pink for Female
+   - Shows median, quartiles, and outliers
