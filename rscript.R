@@ -39,23 +39,32 @@ data_clean <- data_gender %>%
   filter(!is.na(Averagescore)) %>%
   select(Year, Demographic, Averagescore)
 
-# Histogram for Male students
-ggplot(data_gender %>% filter(Demographic == "Male"),
-       aes(x = Mean_Scale_Score)) +
-  geom_histogram(binwidth = 10, fill = "blue", color = "black") +
-  facet_wrap(~Year) +
-  labs(title = "Histogram of Mean Scale Score for Male Students",
-       x = "Mean Scale Score", y = "Count") +
-  theme_minimal()
+# Visualization 1: Histogram with normal curve
+histogram_function <- function(df, binwidth = 10, ymax = 1000) {
+  stats <- df %>% group_by(Demographic) %>%
+    summarise(mean_score = mean(Averagescore),
+              sd_score = sd(Averagescore),
+              n = n(),
+              .groups = 'drop')
+  
+  curve_data <- do.call(rbind, lapply(1:nrow(stats), function(i) {
+    x_vals <- seq(min(df$Averagescore), max(df$Averagescore), length.out = 100)
+    y_vals <- dnorm(x_vals, mean = stats$mean_score[i], sd = stats$sd_score[i])
+    y_vals <- y_vals * stats$n[i] * binwidth
+    data.frame(x = x_vals, y = y_vals, Demographic = stats$Demographic[i])
+  }))
+  
+  ggplot(df, aes(x = Averagescore)) +
+    geom_histogram(aes(y = ..count..), binwidth = binwidth, 
+                   fill = "lightblue", color = "black", alpha = 0.6) +
+    geom_line(data = curve_data, aes(x = x, y = y), color = "red", size = 1) +
+    facet_wrap(~Demographic) +
+    labs(title = "Histogram of Average Scores with Normal Curve (2006–2012)",
+         x = "Average Score", y = "Frequency") +
+    ylim(0, ymax) + theme_minimal()
+}
 
-# Histogram for Female students
-ggplot(data_gender %>% filter(Demographic == "Female"),
-       aes(x = Mean_Scale_Score)) +
-  geom_histogram(binwidth = 10, fill = "pink", color = "black") +
-  facet_wrap(~Year) +
-  labs(title = "Histogram of Mean Scale Score for Female Students",
-       x = "Mean Scale Score", y = "Count") +
-  theme_minimal()
+print(histogram_function(data_clean, binwidth = 10, ymax = 7000))
 
 # Bar plot
 ggplot(summary_gender, aes(x = Year, y = mean_score, fill = Demographic)) +
