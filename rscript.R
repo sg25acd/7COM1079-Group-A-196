@@ -1,67 +1,78 @@
-colnames(X2006_2012_math_test_results_school_gender_1)[6] <- "Averagescore"
-colnames(X2006_2012_math_test_results_school_gender_1)[7] <- "Prof Level1"
-colnames(X2006_2012_math_test_results_school_gender_1)[9] <- "Prof Level2"
-colnames(X2006_2012_math_test_results_school_gender_1)[11] <- "Prof Level3"
+#✔ Load libraries and dataset
+library(readxl)
 library(dplyr)
 library(ggplot2)
 
-# Clean the Averagescore variable
-X2006_2012_math_test_results_school_gender_1 <- X2006_2012_math_test_results_school_gender_1 %>%
+# Load your Excel file
+data <- read_excel("2006-2012-math-test-results-school-gender-1 (1).xlsx")
+
+#✔ Rename Columns (Your Required Column Renaming)
+colnames(data)[6]  <- "Averagescore"
+colnames(data)[7]  <- "Prof_Level1"
+colnames(data)[9]  <- "Prof_Level2"
+colnames(data)[11] <- "Prof_Level3"
+
+#✔ Clean Averagescore (convert to numeric but keep all data)
+data <- data %>%
   mutate(
     Averagescore = ifelse(Averagescore == "s", NA, Averagescore),
     Averagescore = as.numeric(Averagescore)
   )
 
-# Convert Year to factor
-# Clean Averagescore BUT KEEP ALL OTHER COLUMNS
-X2006_2012_math_test_results_school_gender_1 <- X2006_2012_math_test_results_school_gender_1 %>%
-  mutate(
-    Averagescore = ifelse(Averagescore == "s", NA, Averagescore),
-    Averagescore = as.numeric(Averagescore)
-  )
+#✔ Convert Year to factor
+data$Year <- as.factor(data$Year)
 
-# Convert Year to factor
-X2006_2012_math_test_results_school_gender_1$Year <- 
-  as.factor(X2006_2012_math_test_results_school_gender_1$Year)
-
-# Filter only Male & Female rows
+#✔ Filter Male/Female ONLY (no column deletion)
 data_gender <- data %>%
-  filter(Demographic %in% c("Male", "Female")) %>%
-  select(Year, Demographic, Mean_Scale_Score)
+  filter(Demographic %in% c("Male", "Female"))
 
-# Summary statistics by Year and Demographic
+#✔ Summary statistics (Mean of Averagescore)
 summary_gender <- data_gender %>%
   group_by(Year, Demographic) %>%
-  summarise(mean_score = mean(Mean_Scale_Score, na.rm = TRUE),
+  summarise(mean_score = mean(Averagescore, na.rm = TRUE),
             .groups = 'drop')
 
 print(summary_gender)
 
-# Histogram for Male students
-ggplot(data_gender %>% filter(Demographic == "Male"),
-       aes(x = Mean_Scale_Score)) +
-  geom_histogram(binwidth = 10, fill = "blue", color = "black") +
-  facet_wrap(~Year) +
-  labs(title = "Histogram of Mean Scale Score for Male Students",
-       x = "Mean Scale Score", y = "Count") +
-  theme_minimal()
+# Clean data for analysis
+data_clean <- data_gender %>%
+  filter(!is.na(Averagescore)) %>%
+  select(Year, Demographic, Averagescore)
 
-# Histogram for Female students
-ggplot(data_gender %>% filter(Demographic == "Female"),
-       aes(x = Mean_Scale_Score)) +
-  geom_histogram(binwidth = 10, fill = "pink", color = "black") +
-  facet_wrap(~Year) +
-  labs(title = "Histogram of Mean Scale Score for Female Students",
-       x = "Mean Scale Score", y = "Count") +
-  theme_minimal()
+# Visualization 1: Histogram with normal curve
+histogram_function <- function(df, binwidth = 10, ymax = 1000) {
+  stats <- df %>% group_by(Demographic) %>%
+    summarise(mean_score = mean(Averagescore),
+              sd_score = sd(Averagescore),
+              n = n(),
+              .groups = 'drop')
+  
+  curve_data <- do.call(rbind, lapply(1:nrow(stats), function(i) {
+    x_vals <- seq(min(df$Averagescore), max(df$Averagescore), length.out = 100)
+    y_vals <- dnorm(x_vals, mean = stats$mean_score[i], sd = stats$sd_score[i])
+    y_vals <- y_vals * stats$n[i] * binwidth
+    data.frame(x = x_vals, y = y_vals, Demographic = stats$Demographic[i])
+  }))
+  
+  ggplot(df, aes(x = Averagescore)) +
+    geom_histogram(aes(y = ..count..), binwidth = binwidth, 
+                   fill = "lightblue", color = "black", alpha = 0.6) +
+    geom_line(data = curve_data, aes(x = x, y = y), color = "red", size = 1) +
+    facet_wrap(~Demographic) +
+    labs(title = "Histogram of Average Scores with Normal Curve (2006–2012)",
+         x = "Average Score", y = "Frequency") +
+    ylim(0, ymax) + theme_minimal()
+}
 
-# Bar plot
-ggplot(summary_gender, aes(x = Year, y = mean_score, fill = Demographic)) +
-  geom_bar(stat = "identity", position = "dodge") +
-  scale_fill_manual(values = c("Male" = "blue", "Female" = "pink")) +
-  labs(title = "Year-wise Comparison of Mean Scale Score by Gender",
-       x = "Year", y = "Mean Scale Score") +
-  theme_minimal()
+print(histogram_function(data_clean, binwidth = 10, ymax = 7000))
+
+# Visualization 2: Boxplot
+boxplot_plot <- ggplot(data_clean, aes(x = Demographic, y = Averagescore, fill = Demographic)) +
+  geom_boxplot() + scale_fill_manual(values = c("Male" = "blue", "Female" = "pink")) +
+  labs(title = "Boxplot: Distribution of Mathematics Scores by Gender (2006-2012)",
+       x = "Demographic", y = "Average Score") + theme_minimal()
+
+print(boxplot_plot)
 
 
 # Statistical testing
