@@ -63,3 +63,26 @@ ggplot(summary_gender, aes(x = Year, y = mean_score, fill = Demographic)) +
        x = "Year", y = "Mean Scale Score") +
   theme_minimal()
 
+
+# Statistical testing
+print("R code for t-test:")
+print("t.test(Averagescore ~ Demographic, data = data_clean, var.equal = equal_var)")
+
+var_test <- var.test(Averagescore ~ Demographic, data = data_clean)
+equal_var <- var_test$p.value > 0.05
+
+t_test_result <- t.test(Averagescore ~ Demographic, data = data_clean, var.equal = equal_var)
+
+print(paste("Test statistic (t):", round(t_test_result$statistic, 4)))
+print(paste("p-value:", format(t_test_result$p.value, scientific = TRUE, digits = 4)))
+
+if(t_test_result$p.value < 0.05) {
+  print("p-value < 0.05")
+  print("Result: Statistically significant")
+  print("Decision: Reject the null hypothesis")
+} else {
+  print("p-value > 0.05")
+  print("Result: Not statistically significant")
+  print("Decision: Fail to reject the null hypothesis")
+}
+
